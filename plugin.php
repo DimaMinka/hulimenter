@@ -12,9 +12,9 @@ use ElementorPro\Core\Integrations\Integrations_Manager;
 use ElementorPro\Core\Modules_Manager;
 use ElementorPro\Core\Notifications\Notifications_Manager;
 use ElementorPro\Core\Preview\Preview;
+use ElementorPro\Core\Updater\Updater;
 use ElementorPro\Core\Upgrade\Manager as UpgradeManager;
 use ElementorPro\License\API;
-use ElementorPro\License\Updater;
 use ElementorPro\Core\Container\Container;
 use ElementorProDeps\DI\Container as DIContainer;
 use Exception;
@@ -83,11 +83,6 @@ class Plugin {
 		'ElementorPro\Modules\PanelPostsControl\Controls\Group_Control_Posts' => 'ElementorPro\Modules\QueryControl\Controls\Group_Control_Posts',
 		'ElementorPro\Modules\PanelPostsControl\Controls\Query' => 'ElementorPro\Modules\QueryControl\Controls\Query',
 	];
-
-	/**
-	 * @var \ElementorPro\License\Updater
-	 */
-	public $updater;
 
 	/**
 	 * @var PHP_Api
@@ -520,17 +515,46 @@ class Plugin {
 			$this->integrations = new Integrations_Manager(); // TODO: This one is safe to move out of the condition.
 
 			$this->notifications = new Notifications_Manager();
-		}
+			require_once __DIR__ . '/updater/updater.php';
+			$config = array(
+				'slug'               => 'pro-elements.php',
+				'plugin_basename'    => ELEMENTOR_PRO_PLUGIN_BASE,
+				'proper_folder_name' => 'pro-elements',
+				'api_url'            => 'https://api.github.com/repos/proelements/proelements',
+				'raw_url'            => 'https://raw.githubusercontent.com/proelements/proelements/master',
+				'github_url'         => 'https://github.com/proelements/proelements',
+				'zip_url'            => 'https://github.com/proelements/proelements/archive/v{release_version}.zip',
+				'sslverify'          => true,
+				'requires'           => '5.0',
+				'tested'             => '5.4.2',
+				'readme'             => 'README.md',
+				'access_token'       => '',
+			);
 
 		if ( is_admin() ) {
 			$this->admin = new Admin();
 
 			$this->license_admin->register_actions();
+
+			require_once __DIR__ . '/updater/updater.php';
+			$config = array(
+				'slug'               => 'pro-elements.php',
+				'plugin_basename'    => ELEMENTOR_PRO_PLUGIN_BASE,
+				'proper_folder_name' => 'pro-elements',
+				'api_url'            => 'https://api.github.com/repos/proelements/proelements',
+				'raw_url'            => 'https://raw.githubusercontent.com/proelements/proelements/master',
+				'github_url'         => 'https://github.com/proelements/proelements',
+				'zip_url'            => 'https://github.com/proelements/proelements/archive/v{release_version}.zip',
+				'sslverify'          => true,
+				'requires'           => '5.0',
+				'tested'             => '5.4.2',
+				'readme'             => 'README.md',
+				'access_token'       => '',
+			);
 		}
 
-		// The `Updater` class is responsible for adding some updates related filters, including auto updates, and since
-		// WP crons don't run on admin mode, it should not depend on it.
-		$this->updater = new Updater();
+			new Updater( $config );
+		}
 	}
 
 	private function get_assets_suffix() {
@@ -544,7 +568,7 @@ class Plugin {
 	}
 
 	final public static function get_title() {
-		return esc_html__( 'Elementor Pro', 'elementor-pro' );
+		return esc_html__( 'Pro Elements', 'elementor-pro' );
 	}
 }
 

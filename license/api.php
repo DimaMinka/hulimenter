@@ -195,53 +195,31 @@ class API {
 	}
 
 	public static function get_license_data( $force_request = false ) {
-		$license_data_error = [
-			'success' => false,
-			'error' => static::STATUS_HTTP_ERROR,
-			'payment_id' => '0',
-			'license_limit' => '0',
-			'site_count' => '0',
-			'activations_left' => '0',
-		];
+		$license_data['success'] = true;
+		$license_data['features'] = [  
+		                             'custom-attributes',
+		                             'custom_code',
+		                             'custom-css',
+		                             'global-css',
+		                             'display-conditions',
+		                             'dynamic-tags-acf',
+		                             'dynamic-tags-pods',
+		                             'dynamic-tags-toolset',
+		                             'element-manager-permissions',
+		                             'global-widget',
+		                             'editor_comments',
+		                             'stripe-button',
+		                             'popup',
+		                             'role-manager',
+		                             'woocommerce-menu-cart',
+		                             'product-single',
+		                             'product-archive',
+		                             'settings-woocommerce-pages',
+		                             'settings-woocommerce-notices',
+		                             'dynamic-tags-wc',
+		                             'settings-woocommerce-pages',
+		                             'settings-woocommerce-notices'];
 
-		$license_key = Admin::get_license_key();
-
-		if ( empty( $license_key ) ) {
-			$license_data_error['error'] = static::STATUS_MISSING;
-
-			return $license_data_error;
-		}
-
-		$license_data = self::get_transient( Admin::LICENSE_DATA_OPTION_NAME );
-
-		if ( false === $license_data || $force_request ) {
-			$body_args = [
-				'license' => $license_key,
-			];
-
-			if ( self::is_request_running( 'get_license_data' ) ) {
-				if ( false !== $license_data ) {
-					return $license_data;
-				}
-
-				$license_data_error['error'] = static::STATUS_REQUEST_LOCKED;
-
-				return $license_data_error;
-			}
-
-			$license_data = self::remote_post( 'license/validate', $body_args );
-
-			if ( is_wp_error( $license_data ) || ! isset( $license_data['success'] ) ) {
-				$license_data = self::get_transient( Admin::LICENSE_DATA_FALLBACK_OPTION_NAME );
-				if ( false === $license_data ) {
-					$license_data = $license_data_error;
-				}
-
-				self::set_license_data( $license_data, '+30 minutes' );
-			} else {
-				self::set_license_data( $license_data );
-			}
-		}
 
 		return $license_data;
 	}

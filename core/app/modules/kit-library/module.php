@@ -43,7 +43,7 @@ class Module extends BaseModule {
 
 		$app->set_settings( 'kit-library', array_merge( $prev_settings, [
 			'is_pro' => true,
-			'is_library_connected' => API::is_license_active() && $kit_library && $kit_library->is_connected(),
+			'is_library_connected' => false,//API::is_license_active() && $kit_library && $kit_library->is_connected(),
 			'library_connect_url' => $activate->get_admin_url( 'authorize', [
 				'utm_source' => 'kit-library',
 				'utm_medium' => 'wp-dash',

@@ -38,6 +38,7 @@ class Editor extends App {
 		add_action( 'elementor/editor/init', [ $this, 'on_elementor_editor_init' ] );
 		add_action( 'elementor/editor/after_enqueue_styles', [ $this, 'enqueue_editor_styles' ] );
 		add_action( 'elementor/editor/before_enqueue_scripts', [ $this, 'enqueue_editor_scripts' ] );
+
 		add_filter( 'elementor/editor/localize_settings', [ $this, 'localize_settings' ] );
 
 		add_filter( 'elementor/editor/panel/get_pro_details', function( $get_pro_details ) {
@@ -144,22 +145,25 @@ class Editor extends App {
 	}
 
 	public function localize_settings( array $settings ) {
-		$settings['elementPromotionURL'] = Plugin::instance()->license_admin->get_connect_url([
-			'utm_source' => '%s', // Will be replaced in the frontend to the widget name
-			'utm_medium' => 'wp-dash',
-			'utm_campaign' => 'connect-and-activate-license',
-			'utm_content' => 'editor-widget-promotion',
-		]);
 
-		$settings['dynamicPromotionURL'] = Plugin::instance()->license_admin->get_connect_url( [
-			'utm_source' => '%s', // Will be replaced in the frontend to the control name
-			'utm_medium' => 'wp-dash',
-			'utm_campaign' => 'connect-and-activate-license',
-			'utm_content' => 'editor-dynamic-promotion',
-		] );
+		if (!defined('IS_PRO_ELEMENTS')) {
+			$settings['elementPromotionURL'] = Plugin::instance()->license_admin->get_connect_url( [
+				'utm_source'   => '%s', // Will be replaced in the frontend to the widget name
+				'utm_medium'   => 'wp-dash',
+				'utm_campaign' => 'connect-and-activate-license',
+				'utm_content'  => 'editor-widget-promotion',
+			] );
 
-		if ( ! isset( $settings['promotionWidgets'] ) ) {
-			$settings['promotionWidgets'] = License_API::get_promotion_widgets();
+			$settings['dynamicPromotionURL'] = Plugin::instance()->license_admin->get_connect_url( [
+				'utm_source'   => '%s', // Will be replaced in the frontend to the control name
+				'utm_medium'   => 'wp-dash',
+				'utm_campaign' => 'connect-and-activate-license',
+				'utm_content'  => 'editor-dynamic-promotion',
+			] );
+
+			if ( ! isset( $settings['promotionWidgets'] ) ) {
+				$settings['promotionWidgets'] = License_API::get_promotion_widgets();
+			}
 		}
 
 		if ( Display_Conditions_Module::can_use_display_conditions() ) {

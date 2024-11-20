@@ -89,6 +89,13 @@ class Admin extends App {
 	}
 
 	public function remove_go_pro_menu() {
+		if (defined('IS_PRO_ELEMENTS')) {
+			remove_submenu_page( "elementor", "elementor_custom_fonts" );
+			remove_submenu_page( "elementor", "elementor_custom_icons" );
+			remove_submenu_page( \Elementor\TemplateLibrary\Source_Local::ADMIN_MENU_SLUG, "theme_templates" );
+			remove_submenu_page( \Elementor\TemplateLibrary\Source_Local::ADMIN_MENU_SLUG, "popup_templates" );
+			return;
+		}
 		remove_action( 'admin_menu', [ Plugin::elementor()->settings, 'register_pro_menu' ], Settings::MENU_PRIORITY_GO_PRO );
 	}
 
@@ -282,11 +289,19 @@ class Admin extends App {
 	 * Admin constructor.
 	 */
 	public function __construct() {
+		if (!defined('IS_PRO_ELEMENTS'))
 		$this->add_component( 'canary-deployment', new Canary_Deployment() );
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_styles' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		if (!defined('IS_PRO_ELEMENTS'))
 		add_action( 'admin_menu', [ $this, 'remove_go_pro_menu' ], 0 );
+		else add_action( 'admin_menu', [ $this, 'remove_go_pro_menu' ], 999 );
+
+		add_filter( 'elementor/finder/categories', [ $this, 'add_finder_items' ] );
+
+		if (defined('IS_PRO_ELEMENTS')) return;
+		add_filter( 'elementor/tracker/send_tracking_data_params', [ $this, 'change_tracker_params' ], 200 );
 
 		add_action( 'elementor/admin/after_create_settings/' . Tools::PAGE_ID, [ $this, 'register_admin_tools_fields' ], 50 );
 
